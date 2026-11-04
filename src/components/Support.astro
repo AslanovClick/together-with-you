@@ -28,11 +28,13 @@ const copyAll = filled.map((r) => `${r.label}: ${r.value}`).join('\n');
             <li><span>3</span>Підтвердіть платіж.</li>
           </ol>
           <div class="pay__actions">
-            <a class="btn pay__submit" href={support.payUrl} target="_blank" rel="noopener">
+            <a class="btn pay__submit pay__submit--privat" href={support.payUrl} target="_blank" rel="noopener">
+              <img class="pay__logo" src="/privatbank.png" alt="" width="32" height="32" />
               <span>Підтримати через ПриватБанк</span>
               <Icon name="arrowUpRight" size={18} class="icon--move" />
             </a>
-            <a class="btn btn--ghost pay__submit" href={support.monoUrl} target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">
+            <a class="btn pay__submit pay__submit--mono" href={support.monoUrl} target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">
+              <img class="pay__logo pay__logo--mono" src="/mono-m.png" alt="" width="28" height="19" />
               <span>Підтримати через monobank</span>
               <Icon name="arrowUpRight" size={18} class="icon--move" />
             </a>
@@ -152,12 +154,32 @@ const copyAll = filled.map((r) => `${r.label}: ${r.value}`).join('\n');
     color: var(--blue-strong);
   }
   .pay__actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .pay__submit { width: 100%; min-height: 60px; padding: 14px 16px; font-size: 1rem; text-align: center; }
+  .pay__submit {
+    justify-content: flex-start;
+    gap: 12px;
+    width: 100%;
+    min-height: 60px;
+    padding: 14px 20px 14px 14px;
+    font-size: 1rem;
+    text-align: left;
+  }
+  .pay__submit > span { flex: 1; }
   .pay__submit :global(.icon) { flex: none; }
 
+  .pay__submit--privat { background: linear-gradient(135deg, #4ea524 0%, #6cbf3c 100%); }
+  .pay__submit--privat:hover { box-shadow: 0 10px 24px -10px rgb(78 165 36 / 0.55), 0 2px 6px -2px rgb(78 165 36 / 0.25); }
+  .pay__submit--mono { background: linear-gradient(135deg, #181818 0%, #3a3a3c 100%); }
+  .pay__submit--mono:hover { box-shadow: 0 10px 24px -10px rgb(24 24 24 / 0.55), 0 2px 6px -2px rgb(24 24 24 / 0.25); }
+
+  .pay__logo { flex: none; width: 32px; height: 32px; }
+  .pay__logo--mono { width: 28px; height: auto; margin-inline: 2px; }
+
   @media (max-width: 599px) {
-    .pay__submit { padding: 14px 10px; font-size: 0.9375rem; }
+    .pay__actions { grid-template-columns: minmax(0, 1fr); }
+    .pay__submit { gap: 10px; padding: 14px 12px; font-size: 0.9375rem; }
     .pay__submit :global(.icon) { display: none; }
+    .pay__logo { width: 26px; height: 26px; }
+    .pay__logo--mono { width: 24px; height: auto; }
   }
 
   /* Bank transfer */
