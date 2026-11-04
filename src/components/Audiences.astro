@@ -1,0 +1,57 @@
+---
+import Icon from './Icon.astro';
+import { audiences } from '../data/site';
+---
+
+<section class="section audiences" id="audiences">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Для кого ми</span>
+      <h2>Тут є місце для кожного</h2>
+      <p>До наших проєктів може долучитися кожен охочий — незалежно від віку, досвіду чи життєвої ситуації.</p>
+    </div>
+
+    <ul class="audiences__grid">
+      {audiences.map((a, i) => (
+        <li class="card audience" data-accent={a.accent} data-reveal style={`--d:${i}`}>
+          <div class="card-head">
+            <span class="badge"><Icon name={a.icon} /></span>
+            <h3>{a.title}</h3>
+          </div>
+          <p>{a.text}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .audiences { padding-top: 0; }
+  .audiences__grid {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .audience {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: var(--card-pad);
+    transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+  }
+  .audience:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+  .audience p { color: var(--muted); font-size: 0.9688rem; }
+
+  @media (min-width: 640px) {
+    .audiences__grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .audience:last-child { grid-column: 1 / -1; }
+  }
+  @media (min-width: 1024px) {
+    .audiences__grid { grid-template-columns: repeat(6, 1fr); gap: 20px; }
+    .audience { grid-column: span 2; gap: 20px; }
+    .audience:nth-child(4),
+    .audience:last-child { grid-column: span 3; }
+  }
+</style>

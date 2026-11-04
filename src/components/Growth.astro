@@ -1,0 +1,522 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import PdfViewer from './PdfViewer.astro';
+import { annualReports, capacity, documents, growth, teamGrowth } from '../data/site';
+
+// Long lists show their first items; the rest unfold
+const SHOWN = 5;
+// "**phrase**" in the data → bold accent; odd parts of the split are the marked ones
+const rich = (text: string) => text.split('**').map((part, i) => (i % 2 ? `<strong>${part}</strong>` : part)).join('');
+---
+
+<section class="section growth" id="growth">
+  <div class="container">
+    <div class="section-head growth__head" data-reveal>
+      <div>
+        <span class="eyebrow">Розвиток і прозорість</span>
+        <h2>{growth.title}</h2>
+      </div>
+      <p>{growth.lead}</p>
+    </div>
+
+    <!-- Team: what the team has learned and where it grows -->
+    <div class="block-head block-head--first" data-reveal>
+      <h3>Команда</h3>
+    </div>
+    <ul class="cards cards--3" data-equal-cards>
+      {teamGrowth.map((g, i) => (
+        <li class="gcard" data-accent={g.accent} data-reveal style={`--d:${i}`}>
+          <div class="card-head">
+            <span class="badge"><Icon name={g.icon} /></span>
+            <h4>{g.title}</h4>
+          </div>
+          {g.chips ? (
+            <ul class="chips">
+              {g.items.map((it) => <li>{it}</li>)}
+            </ul>
+          ) : (
+            <>
+              <ul class="points">
+                {g.items.slice(0, g.shown ?? SHOWN).map((it) => <li set:html={rich(it)} />)}
+              </ul>
+              {g.items.length > (g.shown ?? SHOWN) && (
+                <details class="more">
+                  <summary>
+                    <span class="more__open">Показати всі · {g.items.length}</span>
+                    <span class="more__close">Згорнути</span>
+                    <Icon name="caretDown" size={16} />
+                  </summary>
+                  <ul class="points">
+                    {g.items.slice(g.shown ?? SHOWN).map((it) => <li set:html={rich(it)} />)}
+                  </ul>
+                </details>
+              )}
+            </>
+          )}
+        </li>
+      ))}
+    </ul>
+
+    <!-- Organisational capacity -->
+    <div class="block-head" data-reveal>
+      <h3>Організаційна спроможність</h3>
+    </div>
+    <!-- Short cards stacked on the left, the long "internal processes" card spans them on the right -->
+    <ul class="cards cards--cap">
+      {capacity.map((c, i) => (
+        <li class="gcard" data-accent={c.accent} data-reveal style={`--d:${i}`}>
+          <div class="card-head">
+            <span class="badge"><Icon name={c.icon} /></span>
+            <h4>{c.title}</h4>
+          </div>
+          <ul class="points">
+            {c.items.map((it) =>
+              typeof it === 'string' ? (
+                <li set:html={rich(it)} />
+              ) : (
+                <li>
+                  <span set:html={rich(it.text)} />
+                  <button class="points__doc" type="button" data-pdf={it.pdf} data-pdf-title={it.pdfTitle}>
+                    <Icon name="filePdf" size={16} />
+                    Переглянути документ
+                  </button>
+                </li>
+              ),
+            )}
+          </ul>
+          {c.list && (
+            <div class="policies-box">
+              <div class="policies-box__head">
+                <span class="badge badge--sm"><Icon name="scroll" size={18} /></span>
+                <h5>{c.list.title}</h5>
+              </div>
+              <ol class="policies">
+                {c.list.items.map((it) => <li>{it}</li>)}
+              </ol>
+              {c.list.note && (
+                <p class="policies-note">
+                  <Icon name="plus" size={16} />
+                  <span>{c.list.note}</span>
+                </p>
+              )}
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+
+    <div class="docs" id="documents">
+      <div class="block-head" data-reveal>
+        <h3>Документи та звіти</h3>
+        <p>Перевірки, сертифікати та річні звіти — у відкритому доступі.</p>
+      </div>
+      <div class="docs__layout">
+        <ul class="docs__grid">
+          {documents.map((d, i) => (
+            <li class="doc" data-reveal style={`--d:${i}`}>
+              <div class="doc__preview">
+                <span class="chip chip--float">{d.kind}</span>
+                <div class="doc__paper">
+                  <Image src={d.thumb} alt="" widths={[240, 480]} sizes="240px" />
+                </div>
+              </div>
+              <div class="doc__body">
+                <h4>{d.title}</h4>
+                <p>{d.meta}</p>
+                <span class="doc__open" aria-hidden="true">Переглянути <Icon name="cornersOut" size={16} /></span>
+              </div>
+              <!-- The whole card opens the PDF -->
+              <button
+                class="doc__hit"
+                type="button"
+                data-pdf={d.pdf}
+                data-pdf-title={d.title}
+                aria-label={`Переглянути: ${d.title}`}
+              ></button>
+            </li>
+          ))}
+        </ul>
+
+        <div class="reports" data-reveal style="--d:3">
+          <div class="card-head">
+            <span class="badge"><Icon name="presentation" /></span>
+            <h4>Річні звіти</h4>
+          </div>
+          <p>Підсумки кожного року: що зробили разом і як використали кошти.</p>
+          <ul class="reports__years">
+            {annualReports.map((r) => (
+              <li>
+                <button
+                  class="year"
+                  type="button"
+                  data-pdf={r.pdf}
+                  data-pdf-title={`Річний звіт ${r.year}`}
+                  data-pdf-folder={r.folderUrl}
+                >
+                  <span class="year__cover"><Image src={r.thumb} alt="" widths={[240, 480]} sizes="200px" /></span>
+                  <span class="year__num">{r.year}</span>
+                  <span class="year__status"><Icon name="cornersOut" size={16} /> Переглянути</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <PdfViewer />
+</section>
+
+<style>
+  .growth { background: var(--surface); }
+
+  .growth__head > div { display: grid; gap: 16px; justify-items: start; }
+
+  .block-head { display: grid; gap: 8px; margin: var(--block) 0 clamp(24px, 3vw, 32px); }
+  .block-head--first { margin-top: 0; }
+  .block-head h3 { font-size: clamp(1.375rem, 1.1rem + 1vw, 1.875rem); }
+  .block-head p { color: var(--muted); }
+
+  /* Cards with icon + title and a list */
+  .cards { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
+  .gcard {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: var(--card-pad);
+    border-radius: var(--radius);
+    background: var(--bg);
+  }
+  .gcard h4 { font-size: 1.25rem; }
+
+  .points { display: grid; margin: 0; padding: 0; list-style: none; }
+  .points li {
+    position: relative;
+    padding: 12px 0 12px 22px;
+    border-top: 1px solid var(--line);
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .points li::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 21px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .points li:last-child { padding-bottom: 0; }
+  .points :global(strong) { font-weight: 700; color: var(--navy); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .chips li {
+    padding: 8px 14px;
+    border-radius: 12px; /* not a pill: long items wrap onto two lines */
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--line);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--navy);
+  }
+
+  /* "Show all" folds */
+  .more { margin-top: auto; } /* pinned to the card bottom so the cards line up */
+  .more[open] { margin-top: 0; }
+  .more summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0;
+    list-style: none;
+    font-weight: 800;
+    font-size: 0.9375rem;
+    color: var(--blue-strong);
+    cursor: var(--cursor-link);
+  }
+  .more summary::-webkit-details-marker { display: none; }
+  .more summary :global(.icon) { transition: transform 0.3s var(--ease); }
+  .more[open] summary :global(.icon) { transform: rotate(180deg); }
+  .more__close,
+  .more[open] .more__open { display: none; }
+  .more[open] .more__close { display: inline; }
+  .more[open] > .points { animation: unfold 0.4s var(--ease); }
+  .more[open] summary { order: 2; }
+  .more[open] { display: flex; flex-direction: column; }
+  @keyframes unfold { from { opacity: 0; transform: translateY(-6px); } }
+
+  /* Policies: a white sheet inside the card, each policy on its own numbered row */
+  .policies-box {
+    margin-top: auto;
+    padding: 20px;
+    border-radius: 20px;
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--line), 0 10px 30px -18px rgb(23 36 110 / 0.18);
+  }
+  .policies-box__head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .policies-box .badge--sm { width: 36px; height: 36px; flex: none; }
+  .policies-box .badge--sm :global(.icon) { width: 18px; height: 18px; }
+  .policies-box h5 { margin: 0; font-family: var(--font-display); font-size: 1.0625rem; color: var(--navy); }
+  .policies {
+    counter-reset: policy;
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--text);
+  }
+  .policies li {
+    counter-increment: policy;
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 12px;
+    align-items: start;
+    padding: 9px 0;
+    border-top: 1px solid var(--line);
+  }
+  .policies li:first-child { border-top: 0; }
+  .policies li::before {
+    content: counter(policy);
+    display: grid;
+    place-items: center;
+    height: 22px;
+    border-radius: 7px;
+    background: var(--accent-soft);
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-ink);
+  }
+  .policies-note {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin: 8px 0 0;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: var(--accent-soft);
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--text);
+  }
+  .policies-note :global(svg) { flex: none; margin-top: 3px; color: var(--accent-ink); }
+
+  /* Opens the item's document in the PDF viewer */
+  .points__doc {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 6px 12px 6px 10px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--accent-ink);
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .points__doc:hover { background: var(--accent); color: #fff; }
+  .points li > span { display: block; }
+
+  .chip {
+    justify-self: start;
+    align-self: flex-start;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--tint);
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--navy);
+  }
+
+  /* Documents */
+  .docs__grid {
+    display: grid;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .doc {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--line);
+    transition: box-shadow 0.3s var(--ease), transform 0.4s var(--ease);
+  }
+  .doc:hover { transform: translateY(-4px); box-shadow: inset 0 0 0 1px transparent, var(--shadow-lg); }
+  .doc__hit {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    border-radius: inherit;
+    background: none;
+    cursor: zoom-in;
+  }
+  .doc__hit:focus-visible { outline: 3px solid var(--blue); outline-offset: -3px; }
+
+  /* The document sits on a tinted desk like a sheet of paper */
+  .doc__preview {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: 220px;
+    overflow: hidden;
+    background:
+      radial-gradient(closest-side, rgb(82 113 255 / 0.12), transparent) 50% 100% / 90% 80% no-repeat,
+      var(--tint);
+  }
+  .doc__paper {
+    width: 58%;
+    margin-top: 48px;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgb(13 47 156 / 0.06), 0 18px 36px -14px rgb(13 47 156 / 0.25);
+    transform: rotate(-3deg);
+    transition: transform 0.6s var(--ease);
+  }
+  .doc:nth-child(2) .doc__paper { transform: rotate(2.5deg); }
+  .doc:hover .doc__paper { transform: rotate(0) translateY(-10px); }
+  .doc__paper img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+  .chip--float { position: absolute; z-index: 1; top: 16px; left: 16px; background: var(--surface); }
+
+  .doc__body { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 24px; }
+  .doc h4 { font-size: 1rem; line-height: 1.3; }
+  .doc__body p { font-size: 0.875rem; color: var(--muted); }
+  .doc__open {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 10px;
+    font-weight: 800;
+    font-size: 0.875rem;
+    color: var(--blue-strong);
+  }
+
+  /* Annual reports: a navy card; each year opens its presentation */
+  .reports {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: var(--card-pad);
+    border-radius: var(--radius);
+    background:
+      radial-gradient(closest-side, rgb(203 108 230 / 0.45), transparent) 110% -10% / 75% 55% no-repeat,
+      radial-gradient(closest-side, rgb(82 113 255 / 0.5), transparent) -20% 110% / 80% 55% no-repeat,
+      var(--navy);
+    color: rgb(255 255 255 / 0.78);
+    overflow: hidden;
+  }
+  .reports .badge { background: rgb(255 255 255 / 0.1); color: var(--yellow); }
+  .reports h4 { font-size: 1.25rem; color: #fff; }
+  .reports > p { font-size: 0.9375rem; }
+  .reports__years {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: auto 0 0;
+    padding: 6px 0 0;
+    list-style: none;
+  }
+  .year {
+    display: grid;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 8px 14px;
+    border: 0;
+    border-radius: 18px;
+    background: rgb(255 255 255 / 0.08);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+    text-align: left;
+    color: #fff;
+    cursor: zoom-in;
+    transition: background-color 0.25s, color 0.25s;
+  }
+  .year:hover,
+  .year:focus-visible { background: #fff; color: var(--navy); }
+  .year__cover { display: block; overflow: hidden; aspect-ratio: 16 / 9; border-radius: 12px; background: rgb(255 255 255 / 0.1); }
+  .year__cover img { width: 100%; height: 100%; object-fit: cover; }
+  .year__num { padding-inline: 6px; font-family: var(--font-display); font-weight: 500; font-size: 1.375rem; letter-spacing: -0.03em; line-height: 1; }
+  .year__status { display: inline-flex; align-items: center; gap: 6px; padding-inline: 6px; font-size: 0.8125rem; font-weight: 700; opacity: 0.8; }
+
+  /* Phones: the documents swipe sideways (the next card peeks in); annual reports stay below, always in view */
+  @media (max-width: 639px) {
+    .docs__grid {
+      display: flex;
+      gap: 12px;
+      margin-inline: calc(var(--gutter) * -1);
+      padding: 4px var(--gutter) 16px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--gutter);
+      scrollbar-width: none;
+      overscroll-behavior-x: contain;
+    }
+    .docs__grid::-webkit-scrollbar { display: none; }
+    .docs__grid > li { flex: 0 0 80%; scroll-snap-align: start; }
+    .reports { margin-top: 4px; }
+  }
+  @media (min-width: 640px) {
+    .docs__grid { grid-template-columns: repeat(3, 1fr); }
+    .reports { margin-top: 16px; }
+  }
+  @media (min-width: 900px) {
+    /* Cards don't stretch to the row: the script gives them one shared min-height while folded,
+       so unfolding one card grows only that card */
+    .cards--3 { grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: start; }
+    .cards--3 > .gcard { min-height: var(--card-h, auto); }
+    .cards--cap {
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-areas: 'a c' 'b c' 'd c';
+      gap: 20px;
+    }
+    .cards--cap > :nth-child(1) { grid-area: a; }
+    .cards--cap > :nth-child(2) { grid-area: b; }
+    .cards--cap > :nth-child(3) { grid-area: c; }
+    .cards--cap > :nth-child(4) { grid-area: d; }
+  }
+  @media (min-width: 1024px) {
+    .growth__head {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 64px;
+      align-items: end;
+      max-width: none;
+    }
+    .growth__head p { padding-bottom: 6px; }
+  }
+  /* Below this width the reports card sits under the documents at full width (its year tiles need room) */
+  @media (min-width: 640px) and (max-width: 1199px) {
+    .reports__years { grid-template-columns: repeat(auto-fill, minmax(180px, 240px)); }
+  }
+  /* Wide screens: reports become the fourth column; each year is a row with a small cover */
+  @media (min-width: 1200px) {
+    .docs__layout { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .docs__grid { grid-column: span 3; grid-template-columns: subgrid; gap: 20px; }
+    .reports { margin-top: 0; }
+    .reports__years { grid-template-columns: 1fr; }
+    .year { grid-template-columns: 76px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 12px; row-gap: 4px; align-items: center; padding: 8px; }
+    .year__cover { grid-row: span 2; border-radius: 10px; }
+    .year__num, .year__status { padding-inline: 0; }
+    .year__num { align-self: end; }
+    .year__status { align-self: start; }
+  }
+</style>

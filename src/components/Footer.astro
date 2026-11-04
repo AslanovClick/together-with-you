@@ -1,0 +1,111 @@
+---
+import logoSvg from '../assets/logo/logo-horizontal-white.svg?raw';
+import Icon from './Icon.astro';
+import kolir from '../assets/credits/kolir.svg';
+import { nav, org, socials } from '../data/site';
+
+const year = new Date().getFullYear();
+// Inlined rather than loaded as <img>: the lazy-loaded file failed to show in some browsers.
+const logo = logoSvg.replace(/<svg[^>]*?>/, (tag) =>
+  tag
+    .replace(/\s(width|height)="[^"]*"/g, '')
+    .replace('<svg', `<svg class="footer__logo" role="img" aria-label="${org.name}"`),
+);
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <Fragment set:html={logo} />
+        <p>{org.description}</p>
+        <a class="btn btn--light btn--sm" href="#support">
+          <Icon name="heart" size={16} />
+          Підтримати фонд
+        </a>
+      </div>
+
+      <nav class="footer__col" aria-label="Навігація у футері">
+        <h2>Розділи</h2>
+        <ul>
+          {nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+          <li><a href="#documents">Документи та звіти</a></li>
+        </ul>
+      </nav>
+
+      <div class="footer__col">
+        <h2>Контакти</h2>
+        <ul>
+          <li><a href={org.phoneHref}>{org.phone}</a></li>
+          <li><a href={`mailto:${org.email}`}>{org.email}</a></li>
+          <li><a href={org.mapUrl} target="_blank" rel="noopener">{org.addressShort}</a></li>
+        </ul>
+        <div class="footer__socials">
+          {socials.filter((s) => s.url).map((s) => (
+            <a href={s.url!} target="_blank" rel="noopener" aria-label={s.name}><Icon name={s.icon} size={20} /></a>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <p>© {year} {org.shortLegalName}{org.edrpou && <> · ЄДРПОУ {org.edrpou}</>}</p>
+      <div class="footer__meta">
+        <!-- TODO: privacy policy page -->
+        <a href="#">Політика конфіденційності</a>
+        <p class="footer__credit">
+          Дизайн та розробка
+          <img src={kolir.src} alt="Колір" width="54" height="20" loading="lazy" />
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-block: clamp(56px, 7vw, 88px) 32px;
+    background: var(--navy-deep);
+    color: rgb(255 255 255 / 0.7);
+    font-size: 0.9688rem;
+  }
+  .footer a { text-decoration: none; transition: color 0.2s; }
+  .footer a:hover { color: #fff; }
+  .footer__top { display: grid; gap: 40px; }
+  .footer__brand { display: grid; gap: 20px; justify-items: start; max-width: 380px; }
+  .footer__brand :global(.footer__logo) { width: 150px; height: auto; }
+  .footer__col h2 {
+    margin-bottom: 16px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--yellow);
+  }
+  .footer__col ul { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+  .footer__socials { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .footer__socials a {
+    display: grid; place-items: center; width: 44px; height: 44px;
+    border-radius: 50%; background: rgb(255 255 255 / 0.08); color: #fff;
+  }
+  .footer__socials a:hover { background: var(--blue-strong); }
+  .footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid rgb(255 255 255 / 0.1);
+    font-size: 0.875rem;
+    color: rgb(255 255 255 / 0.7);
+  }
+  .footer__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; }
+  .footer__credit { display: inline-flex; align-items: center; gap: 10px; }
+  .footer__credit img { width: 54px; height: auto; }
+
+  @media (min-width: 768px) {
+    .footer__top { grid-template-columns: 1.4fr 1fr 1fr; }
+  }
+</style>

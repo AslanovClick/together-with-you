@@ -1,0 +1,256 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import { about, instagramUrl } from '../data/site';
+---
+
+<section class="section about" id="about">
+  <div class="container">
+    <div class="about__grid">
+      <div class="about__text" data-reveal>
+        <span class="eyebrow">Про нас</span>
+        <h2>{about.title}</h2>
+        <p class="about__lead">{about.lead}</p>
+        <blockquote class="about__thesis">
+          <p>Не просто «підтримуємо громаду», а <strong>розвиваємо її разом</strong>.</p>
+        </blockquote>
+        <a class="btn" href={instagramUrl} target="_blank" rel="noopener">
+          Дізнатися про фонд
+          <Icon name="arrowUpRight" size={18} class="icon--move" />
+        </a>
+      </div>
+
+      <figure class="team" data-reveal style={`--d:1; aspect-ratio: ${about.team.photo.width} / ${about.team.photo.height}`}>
+        <Image
+          src={about.team.photo}
+          alt={about.team.alt}
+          widths={[480, 800, 1200]}
+          sizes="(min-width: 1024px) 640px, 100vw"
+        />
+        <!-- Names sit along the bottom edge, below the faces, in the same left-to-right order as the people -->
+        <figcaption class="team__caption">
+          {about.team.people.map((p) => (
+            <span>
+              <strong>{p.name}</strong>
+              {p.role}
+            </span>
+          ))}
+        </figcaption>
+      </figure>
+    </div>
+
+    <!-- The fund's full story, folded so the section stays short -->
+    <details class="story" data-reveal>
+      <summary>
+        <span>{about.moreTitle}</span>
+        <span class="story__toggle" aria-hidden="true"><Icon name="plus" size={20} /></span>
+      </summary>
+      <div class="story__body">
+        {about.more.map((p) => <p>{p}</p>)}
+      </div>
+    </details>
+
+    <figure class="mission" data-reveal data-follow>
+      <span class="mission__glow" aria-hidden="true"></span>
+      <figcaption class="eyebrow">Наша місія</figcaption>
+      <blockquote>
+        <!-- The flag stays glued to the last word so it never wraps alone -->
+        {about.mission[0]} <mark>{about.mission[1]}</mark>{about.mission[2]}{' '}<span class="mission__end">{about.mission[3]}<svg class="mission__flag" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="10" rx="0" fill="#0057B7" /><rect y="10" width="30" height="10" fill="#FFD500" /></svg></span>
+      </blockquote>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .about__grid {
+    display: grid;
+    gap: clamp(40px, 6vw, 80px);
+    align-items: center;
+  }
+  .about__text { display: grid; gap: 20px; justify-items: start; }
+  .about__lead { font-size: 1.125rem; color: var(--muted); }
+  /* The key idea as a pull quote: a round quote badge (like the icon circles elsewhere)
+     on a white card, italic text with the key phrase in bold */
+  .about__thesis {
+    position: relative;
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    margin: 4px 0 8px;
+    padding: 24px 28px 24px 24px;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+  .about__thesis::before {
+    content: '“';
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    padding-top: 14px; /* the glyph sits high in its box */
+    border-radius: 50%;
+    background: var(--blue-strong);
+    font-family: var(--font-display);
+    font-size: 2rem;
+    line-height: 1;
+    color: #fff;
+  }
+  .about__thesis p {
+    padding-top: 6px;
+    font-size: clamp(1.125rem, 1.05rem + 0.35vw, 1.3125rem);
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--text);
+  }
+  .about__thesis strong {
+    font-weight: 800;
+    color: var(--navy);
+  }
+
+  /* Team photo */
+  .team {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+  }
+  .team img { width: 100%; height: 100%; object-fit: cover; }
+  .team__caption {
+    position: absolute;
+    inset: auto 0 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(8px, 2vw, 12px);
+    padding: 72px clamp(16px, 3vw, 28px) clamp(16px, 2.4vw, 24px);
+    background: linear-gradient(to top, rgb(10 36 121 / 0.92), rgb(10 36 121 / 0.6) 55%, transparent);
+    color: rgb(255 255 255 / 0.78);
+    font-size: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+    line-height: 1.35;
+  }
+  .team__caption span {
+    display: grid;
+    gap: 2px;
+    padding-left: clamp(8px, 1.6vw, 12px);
+    border-left: 2px solid rgb(255 255 255 / 0.35);
+  }
+  .team__caption strong {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(0.9375rem, 0.85rem + 0.4vw, 1.125rem);
+    color: #fff;
+  }
+
+  /* Story: a calm card that unfolds the full text */
+  .story {
+    margin-top: var(--block);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+  .story summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: var(--card-pad) clamp(var(--card-pad), 4vw, 48px);
+    list-style: none;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+    color: var(--navy);
+    cursor: var(--cursor-link);
+  }
+  .story summary::-webkit-details-marker { display: none; }
+  .story__toggle {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--tint);
+    color: var(--blue-strong);
+    transition: transform 0.4s var(--ease), background-color 0.2s, color 0.2s;
+  }
+  .story summary:hover .story__toggle { background: var(--blue-strong); color: #fff; }
+  .story[open] .story__toggle { transform: rotate(45deg); }
+  .story__body {
+    display: grid;
+    gap: 16px;
+    max-width: 880px;
+    padding: 0 clamp(var(--card-pad), 4vw, 48px) clamp(var(--card-pad), 4vw, 48px);
+    font-size: 1.0625rem;
+    color: var(--text);
+  }
+  .story[open] .story__body { animation: story-in 0.5s var(--ease); }
+  @keyframes story-in { from { opacity: 0; transform: translateY(-8px); } }
+
+  /* Mission */
+  .mission {
+    position: relative;
+    margin: var(--block) 0 0;
+    padding: clamp(var(--card-pad), 6vw, 80px);
+    border-radius: var(--radius-lg);
+    background:
+      radial-gradient(closest-side, rgb(203 108 230 / 0.16), transparent) 100% 0 / 55% 120% no-repeat,
+      radial-gradient(closest-side, rgb(255 195 104 / 0.22), transparent) 85% 100% / 40% 90% no-repeat,
+      var(--tint);
+    overflow: hidden;
+  }
+  /* Soft light that drifts after the cursor (offset set by the script via --dx/--dy) */
+  .mission__glow {
+    position: absolute;
+    z-index: 0;
+    left: 78%;
+    top: 30%;
+    width: 420px;
+    height: 420px;
+    margin: -210px 0 0 -210px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(82 113 255 / 0.22), rgb(203 108 230 / 0.12) 55%, transparent);
+    will-change: transform;
+    pointer-events: none;
+  }
+  .mission > :not(.mission__glow) { position: relative; z-index: 1; }
+  .mission blockquote {
+    max-width: 980px;
+    margin: 20px 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.375rem, 0.95rem + 2vw, 2.375rem);
+    font-weight: 400;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+    color: var(--navy);
+  }
+  /* Same yellow marker as the hero headline; drawn as a background so it follows the phrase across line breaks */
+  .mission mark {
+    padding: 0 0.08em;
+    color: inherit;
+    background: linear-gradient(rgb(255 213 87 / 0.75), rgb(255 213 87 / 0.75)) 0 88% / 0% 34% no-repeat;
+    border-radius: 999px;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    transition: background-size 1s 0.4s var(--ease);
+  }
+  .mission.is-visible mark,
+  :global(html:not(.js)) .mission mark { background-size: 100% 34%; }
+  .mission__end { white-space: nowrap; }
+  .mission__flag {
+    display: inline-block;
+    width: 1.05em;
+    height: 0.7em;
+    margin-left: 0.3em;
+    border-radius: 0.14em;
+    vertical-align: -0.02em;
+    box-shadow: 0 2px 8px rgb(0 87 183 / 0.18);
+    transform: rotate(-6deg);
+  }
+
+  @media (min-width: 1024px) {
+    .about__grid { grid-template-columns: 0.9fr 1.1fr; }
+  }
+</style>

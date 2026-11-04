@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.astro/
+
+# Local editor settings and original reference materials
+.claude/
+/public/new/
+/*.zip
+/*.pdf
+/*.svg
+/logo.png
+
+# Local environment and diagnostics
+.env
+.env.*
+!.env.example
+*.log

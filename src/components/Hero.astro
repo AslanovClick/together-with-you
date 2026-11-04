@@ -1,0 +1,243 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import { hero, org } from '../data/site';
+
+const slots = [
+  { key: 'main', photos: hero.photos.main, width: 640, eager: true },
+  { key: 'small', photos: hero.photos.small, width: 320, eager: false },
+  { key: 'tiny', photos: hero.photos.tiny, width: 260, eager: false },
+] as const;
+---
+
+<section class="hero" id="top">
+  <div class="container hero__inner">
+    <div class="hero__text">
+      <p class="hero__chip" data-reveal>
+        <Icon name="mapPin" size={18} />
+        {org.location}
+      </p>
+      <h1 data-reveal style="--d:1">
+        {hero.title[0]} <span class="hl">{hero.title[1]}</span>
+      </h1>
+      <p class="hero__lead" data-reveal style="--d:2">{hero.lead}</p>
+      <div class="hero__actions" data-reveal style="--d:3">
+        <a class="btn" href="#support">
+          <Icon name="heart" size={18} />
+          Підтримати фонд
+        </a>
+        <a class="btn btn--ghost" href="#join">
+          Як долучитися
+          <Icon name="arrowRight" size={18} class="icon--move" />
+        </a>
+      </div>
+    </div>
+
+    <div class="hero__visual" aria-label="Фото з наших заходів" role="group">
+      <div class="stage">
+        <span class="disc disc--yellow"></span>
+        <span class="disc disc--violet"></span>
+        <span class="disc disc--blue"></span>
+        <span class="disc disc--coral"></span>
+        <span class="dot dot--1"></span>
+        <span class="dot dot--2"></span>
+
+        {slots.map((slot) => (
+          <div class={`photo photo--${slot.key}`} data-rotator>
+            {slot.photos.map((p, i) => (
+              <Image
+                src={p.src}
+                alt={p.alt}
+                widths={[slot.width / 2, slot.width]}
+                sizes={`(min-width: 1024px) ${slot.width / 1.1}px, 70vw`}
+                loading={slot.eager && i === 0 ? 'eager' : 'lazy'}
+                fetchpriority={slot.eager && i === 0 ? 'high' : 'auto'}
+                class={i === 0 ? 'is-active' : ''}
+              />
+            ))}
+          </div>
+        ))}
+
+        <div class="hero__note">
+          <span class="badge" data-accent="yellow"><Icon name="usersThree" size={22} /></span>
+          <span><strong>831</strong> учасник уже з нами</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* The hero slides under the transparent header so its background has no seam at the top */
+  .hero {
+    position: relative;
+    margin-top: calc(var(--header-h) * -1);
+    padding-block: calc(var(--header-h) + clamp(24px, 4vw, 48px)) var(--section);
+    overflow: hidden;
+  }
+  /* Soft brand light: each gradient fades out fully inside its own box, so nothing gets clipped */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(closest-side, rgb(203 108 230 / 0.16), transparent) 100% 0 / 60% 85% no-repeat,
+      radial-gradient(closest-side, rgb(82 113 255 / 0.1), transparent) 70% 100% / 50% 70% no-repeat,
+      radial-gradient(closest-side, rgb(255 195 104 / 0.2), transparent) 0 100% / 40% 70% no-repeat;
+  }
+  .hero__inner {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: clamp(32px, 5vw, 64px);
+    align-items: center;
+  }
+
+  .hero__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 8px 16px 8px 12px;
+    border-radius: 999px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    font-weight: 700;
+    font-size: 0.9375rem;
+    color: var(--navy);
+  }
+  .hero__chip .icon { color: var(--coral); }
+
+  h1 {
+    font-size: clamp(2rem, 1.1rem + 4vw, 3.75rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+  }
+  .hl {
+    position: relative;
+    display: inline-block;
+    z-index: 0;
+    color: var(--navy);
+    white-space: nowrap;
+  }
+  .hl::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: auto -2% 4% -2%;
+    height: 34%;
+    border-radius: 999px;
+    background: var(--yellow);
+    opacity: 0.75;
+    transform: scaleX(0);
+    transform-origin: left center;
+    animation: hl-draw 0.9s 0.7s var(--ease) forwards;
+  }
+  @keyframes hl-draw { to { transform: scaleX(1); } }
+
+  .hero__lead {
+    margin-top: 20px;
+    max-width: 560px;
+    font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+    color: var(--muted);
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  /* Visual: photos in overlapping circles, like the logo. Colour discs stay behind the photos
+     and only blend with each other, so the photos are never tinted. */
+  .hero__visual { display: flex; justify-content: center; }
+  .stage {
+    position: relative;
+    width: min(100%, 600px);
+    aspect-ratio: 1;
+  }
+  .stage > * { position: absolute; border-radius: 50%; }
+
+  .disc {
+    --c: var(--blue);
+    background: radial-gradient(circle at 32% 28%, color-mix(in srgb, var(--c) 45%, white), var(--c) 72%);
+    mix-blend-mode: multiply;
+    opacity: 0.85;
+    animation: float 14s ease-in-out infinite alternate;
+  }
+  .disc--yellow { --c: var(--yellow); width: 42%; height: 42%; left: 1%; top: 36%; opacity: 0.9; }
+  .disc--violet { --c: var(--violet); width: 40%; height: 40%; left: 55%; top: 3%; animation-duration: 17s; animation-delay: -4s; }
+  .disc--blue { --c: var(--blue); width: 31%; height: 31%; left: 67%; top: 48%; animation-duration: 15s; animation-delay: -8s; }
+  .disc--coral { --c: var(--coral); width: 21%; height: 21%; left: 20%; top: 73%; opacity: 0.75; animation-duration: 12s; animation-delay: -2s; }
+
+  .photo {
+    overflow: hidden;
+    background: var(--tint);
+    border: 6px solid #fff;
+    box-shadow: var(--shadow-lg);
+  }
+  .photo--main { width: 62%; height: 62%; left: 19%; top: 16%; border-width: 8px; }
+  .photo--small { width: 26%; height: 26%; left: 4%; top: 7%; }
+  .photo--tiny { width: 23%; height: 23%; left: 70%; top: 71%; }
+  .photo img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1.06);
+    transition: opacity 1.4s ease, transform 6s ease-out;
+  }
+  .photo--tiny img { object-position: 50% 25%; } /* portrait shots: keep faces in the circle */
+  .photo img.is-active { opacity: 1; transform: scale(1); }
+
+  .dot { width: 2.4%; height: 2.4%; animation: float 9s ease-in-out infinite alternate; }
+  .dot--1 { left: 42%; top: 5%; background: var(--yellow); }
+  .dot--2 { left: 95%; top: 42%; background: var(--coral); animation-delay: -3s; }
+
+  .hero__note {
+    left: -1%;
+    bottom: 6%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 18px 8px 8px;
+    border-radius: 999px !important;
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+    font-size: 0.9375rem;
+    color: var(--navy);
+    white-space: nowrap;
+    animation: float 11s ease-in-out infinite alternate;
+  }
+  .hero__note .badge { width: 40px; height: 40px; border-radius: 50%; }
+  .hero__note strong { font-family: var(--font-display); font-weight: 600; }
+
+  /* Entrance */
+  :global(.js) .stage { animation: fade 1s var(--ease) both; }
+  :global(.js) .stage > .photo { animation: enter 1.1s var(--ease) both; }
+  @keyframes fade { from { opacity: 0; } }
+  :global(.js) .stage > .photo--main { animation-delay: 0.15s; }
+  :global(.js) .stage > .photo--small { animation-delay: 0.35s; }
+  :global(.js) .stage > .photo--tiny { animation-delay: 0.5s; }
+
+  @keyframes enter { from { opacity: 0; transform: scale(0.6); } }
+  @keyframes float {
+    from { translate: 0 0; }
+    to { translate: 0 -12px; }
+  }
+
+  @media (max-width: 479px) {
+    .hero__actions .btn { flex: 1 1 100%; }
+    .hero__note { left: 0; bottom: 2%; gap: 8px; padding: 6px 14px 6px 6px; font-size: 0.8125rem; }
+    .hero__note .badge { width: 32px; height: 32px; }
+    .hero__note .badge :global(.icon) { width: 18px; height: 18px; }
+  }
+
+  @media (min-width: 1024px) {
+    .hero__inner { grid-template-columns: 1.08fr 1fr; }
+  }
+</style>

@@ -1,0 +1,163 @@
+---
+// Full-screen PDF viewer: pages render with pdf.js as you scroll; title, page number and actions
+// sit together on one panel. Open it with a button that has
+// data-pdf="/docs/file.pdf" data-pdf-title="…" and, optionally, data-pdf-folder="https://…".
+import Icon from './Icon.astro';
+---
+
+<dialog class="pv" data-pdf-viewer aria-label="Перегляд документа">
+  <div class="pv__scroll" data-pdf-scroll>
+    <div class="pv__pages" data-pdf-pages></div>
+    <p class="pv__status" data-pdf-status>Завантажуємо документ…</p>
+  </div>
+
+  <div class="pv__panel">
+    <div class="pv__meta">
+      <span class="pv__count">Сторінка <b data-pdf-page>1</b> / <span data-pdf-total>…</span></span>
+      <span class="pv__title" data-pdf-title></span>
+    </div>
+    <div class="pv__actions">
+      <div class="pv__nav">
+        <button class="pv__btn" type="button" data-pdf-prev aria-label="Попередня сторінка">
+          <Icon name="arrowRight" size={20} class="up" />
+        </button>
+        <button class="pv__btn" type="button" data-pdf-next aria-label="Наступна сторінка">
+          <Icon name="arrowRight" size={20} class="down" />
+        </button>
+      </div>
+      <a class="btn btn--light btn--sm pv__link" href="#" target="_blank" rel="noopener" data-pdf-folder hidden>
+        <Icon name="folderOpen" size={18} />
+        Папка з файлами
+      </a>
+      <a class="btn btn--light btn--sm pv__link" href="#" download data-pdf-download>
+        <Icon name="download" size={18} />
+        PDF
+      </a>
+    </div>
+  </div>
+
+  <button class="pv__btn pv__close" type="button" data-pdf-close aria-label="Закрити">
+    <Icon name="x" size={22} />
+  </button>
+</dialog>
+
+<style>
+  .pv {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    overflow: hidden;
+  }
+  .pv[open] { display: block; animation: pv-in 0.3s ease; }
+  .pv::backdrop { background: rgb(6 16 52 / 0.92); backdrop-filter: blur(6px); }
+  @keyframes pv-in { from { opacity: 0; } }
+
+  /* Pages stack vertically and scroll; the bottom padding keeps the last page clear of the panel */
+  /* Flex column + auto margins: a short document (one page) sits in the middle, a long one scrolls */
+  .pv__scroll {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 80px 16px 150px;
+  }
+  .pv__pages { display: grid; gap: 16px; width: min(100%, var(--pv-width, 900px)); margin: auto; }
+  .pv__pages :global(.pv__page) {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.5);
+  }
+  .pv__pages :global(canvas) { display: block; width: 100%; height: 100%; }
+  .pv__status { margin: auto; text-align: center; color: rgb(255 255 255 / 0.7); }
+  .pv__status[hidden] { display: none; }
+
+  /* One panel for everything: title and page number, paging, links, close */
+  .pv__panel {
+    position: fixed;
+    left: 50%;
+    bottom: 16px;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 20px;
+    width: min(100% - 32px, 980px);
+    padding: 12px 12px 12px 24px;
+    border-radius: 28px;
+    background: rgb(13 47 156 / 0.86);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 20px 50px -20px rgb(0 0 0 / 0.6), inset 0 0 0 1px rgb(255 255 255 / 0.1);
+    translate: -50% 0;
+  }
+  .pv__meta { display: grid; gap: 2px; flex: 1; min-width: 0; }
+  .pv__count { font-size: 0.8125rem; color: rgb(255 255 255 / 0.75); font-variant-numeric: tabular-nums; }
+  .pv__count b { color: #fff; }
+  .pv__title {
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 1rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .pv__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .pv__nav { display: flex; gap: 6px; }
+  .pv__link[hidden] { display: none; }
+  .pv__btn {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.12);
+    color: #fff;
+    cursor: var(--cursor-link);
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .pv__btn:hover,
+  .pv__btn:focus-visible { background: #fff; color: var(--navy); }
+  .pv__btn:disabled { opacity: 0.35; pointer-events: none; }
+  /* Frosted backing so the close button stays visible over a white page */
+  .pv__close {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 3;
+    width: 52px;
+    height: 52px;
+    background: rgb(13 47 156 / 0.72);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.5), inset 0 0 0 1px rgb(255 255 255 / 0.14);
+  }
+  .pv :global(.up) { transform: rotate(-90deg); }
+  .pv :global(.down) { transform: rotate(90deg); }
+  :global(html:has(.pv[open])) { overflow: hidden; }
+
+  @media (min-width: 900px) {
+    .pv__close { top: 24px; right: 28px; }
+  }
+  /* Phones: title on the first row, the two links side by side on one line below */
+  @media (max-width: 639px) {
+    .pv__scroll { padding: 76px 8px 170px; }
+    .pv__panel { bottom: 8px; width: calc(100% - 16px); padding: 12px; border-radius: 22px; }
+    .pv__meta { flex: 1 1 100%; padding-left: 8px; }
+    .pv__actions { flex: 1 1 100%; flex-wrap: nowrap; }
+    .pv__nav { display: none; } /* the finger scrolls the pages */
+    .pv__link { flex: none; padding-inline: 16px; white-space: nowrap; }
+    .pv__link[data-pdf-folder] { flex: 1; justify-content: center; }
+    .pv__link[data-pdf-download]:only-child,
+    .pv__link[data-pdf-folder][hidden] + .pv__link { flex: 1; justify-content: center; }
+  }
+</style>

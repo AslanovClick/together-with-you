@@ -1,0 +1,124 @@
+---
+import { stats, statsNote } from '../data/site';
+
+const fmt = new Intl.NumberFormat('uk-UA');
+---
+
+<section class="section stats" id="impact">
+  <div class="container stats__inner">
+    <div class="stats__text" data-reveal>
+      <span class="eyebrow">Наш вплив у цифрах</span>
+      <h2>Кожна цифра — це люди поруч</h2>
+      <p>
+        За цими числами — діти й підлітки, які втілюють власні ініціативи, дорослі, що опановують нові навички,
+        учасники спільних заходів та ті, хто допомагає втілювати наші ідеї в життя.
+      </p>
+      <p class="stats__note">* {statsNote}</p>
+    </div>
+
+    <ul class="bubbles">
+      {stats.map((s, i) => (
+        <li class={`bubble bubble--${i + 1}`} data-accent={s.accent} data-reveal style={`--d:${i}`}>
+          <span class="bubble__body">
+            <strong class="bubble__num">
+              <span><span data-count={s.value}>{fmt.format(s.value)}</span>{s.suffix}</span>
+              {s.note && <sup>*</sup>}
+            </strong>
+            <span class="bubble__label">{s.label}</span>
+          </span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .stats {
+    background: var(--navy);
+    color: rgb(255 255 255 / 0.78);
+    overflow: hidden;
+  }
+  .stats h2 { color: #fff; }
+  .stats .eyebrow { color: var(--yellow); }
+  .stats__inner { display: grid; gap: 48px; align-items: center; }
+  .stats__text { display: grid; gap: 18px; max-width: 460px; }
+  .stats__text p { font-size: 1.125rem; }
+  .stats__note { font-size: 0.875rem !important; color: rgb(255 255 255 / 0.72); }
+
+  .bubbles {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .bubble {
+    --fill: var(--accent);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    container-type: inline-size;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    color: var(--navy-deep);
+    /* Light falls from the top left; the navy ring cuts a clean gap where circles overlap */
+    background: radial-gradient(circle at 30% 24%, color-mix(in srgb, var(--fill) 80%, white), var(--fill) 70%);
+    box-shadow: 0 0 0 6px var(--navy), 0 32px 60px -28px rgb(4 14 60 / 0.6);
+  }
+  .bubble[data-accent='blue'] { --fill: var(--blue-strong); color: #fff; background: radial-gradient(circle at 30% 24%, #6a84ff, var(--fill) 70%); }
+  .bubble.bubble--6 { --fill: #e4e9ff; color: var(--navy); background: radial-gradient(circle at 30% 24%, #fff, var(--fill) 75%); }
+  :global(.js) .bubble[data-reveal] { transform: scale(0.7); }
+  :global(.js) .bubble[data-reveal].is-visible { transform: none; }
+
+  .bubble__body { display: grid; gap: 5cqi; padding: 0 13cqi; }
+  .bubble__num {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 21cqi;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .bubble__num sup { font-size: 0.42em; vertical-align: top; margin-left: 1cqi; }
+  .bubble__label {
+    font-size: clamp(0.75rem, 7.4cqi, 1.0625rem);
+    font-weight: 700;
+    line-height: 1.25;
+    opacity: 0.82;
+  }
+
+  /* Desktop: an organic cluster of overlapping circles, like the logo */
+  @media (min-width: 900px) {
+    .stats__inner { grid-template-columns: 0.8fr 1fr; gap: 64px; }
+    .bubbles {
+      display: block;
+      aspect-ratio: 1;
+      width: 100%;
+      max-width: 620px;
+      justify-self: end;
+    }
+    .bubbles::after {
+      content: '';
+      position: absolute;
+      width: 2.4%;
+      aspect-ratio: 1;
+      left: 88%;
+      top: 18%;
+      border-radius: 50%;
+      background: var(--yellow);
+      pointer-events: none;
+    }
+    .bubble { position: absolute; }
+    /* Six circles; the longest labels sit in the largest ones */
+    .bubble--1 { width: 30%; left: 4%; top: 9%; }
+    .bubble--2 { width: 38%; left: 37%; top: 3%; }
+    .bubble--3 { width: 34%; left: 63%; top: 38%; }
+    .bubble--4 { width: 24%; left: 36%; top: 40%; z-index: 1; }
+    .bubble--5 { width: 32%; left: 6%; top: 46%; }
+    .bubble--6 { width: 34%; left: 33%; top: 63%; z-index: 2; }
+    .bubble__label { font-size: clamp(0.8125rem, 6.6cqi, 1.0625rem); }
+  }
+</style>

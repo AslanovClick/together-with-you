@@ -1,0 +1,75 @@
+---
+import Icon from './Icon.astro';
+import { directions } from '../data/site';
+---
+
+<section class="section directions" id="directions">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Що ми робимо</span>
+      <h2>Створюємо можливості для розвитку громади</h2>
+    </div>
+
+    <ul class="directions__grid">
+      {directions.map((d, i) => (
+        <li class="direction" data-accent={d.accent} data-reveal style={`--d:${i % 3}`}>
+          <div class="card-head">
+            <span class="badge"><Icon name={d.icon} /></span>
+            <h3>{d.title}</h3>
+          </div>
+          <p>{d.text}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .directions { padding-top: 0; }
+  .directions__grid {
+    display: grid;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .direction {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: var(--card-pad);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    isolation: isolate;
+    transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+  }
+  /* A soft accent circle in the corner that swells slightly on hover */
+  .direction::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    width: 200px;
+    height: 200px;
+    right: -100px;
+    bottom: -100px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    opacity: 0.8;
+    transition: transform 0.7s var(--ease), opacity 0.7s var(--ease);
+  }
+  .direction:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+  .direction:hover::after { transform: scale(1.15); opacity: 1; }
+
+  .direction h3 { font-size: 1.25rem; }
+  .direction p { color: var(--muted); flex: 1; }
+
+  @media (min-width: 640px) {
+    .directions__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1024px) {
+    .directions__grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  }
+</style>

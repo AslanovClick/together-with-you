@@ -1,0 +1,200 @@
+---
+import logo from '../assets/logo/logo-horizontal.svg';
+import Icon from './Icon.astro';
+import { nav, org, socials } from '../data/site';
+---
+
+<header class="header" data-header>
+  <div class="container header__inner">
+    <a class="header__logo" href="#top" aria-label={`${org.name} — на початок сторінки`}>
+      <img src={logo.src} alt="" width="136" height="62" />
+    </a>
+
+    <nav class="header__nav" aria-label="Основна навігація">
+      <ul>
+        {nav.map((item) => (
+          <li><a href={item.href} data-nav-link>{item.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <a class="btn btn--sm header__cta" href="#support">
+      <Icon name="heart" size={18} />
+      Підтримати
+    </a>
+
+    <button class="header__burger" type="button" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
+      <span class="sr-only">Меню</span>
+      <span class="burger-lines" aria-hidden="true"><span></span><span></span></span>
+    </button>
+  </div>
+
+  <div class="mobile-menu" id="mobile-menu" data-menu hidden>
+    <nav aria-label="Мобільна навігація">
+      <ul>
+        {nav.map((item, i) => (
+          <li style={`--i:${i}`}><a href={item.href} data-menu-link>{item.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+    <div class="mobile-menu__footer">
+      <a class="mobile-menu__contact" href={org.phoneHref}>
+        <span class="mobile-menu__icon"><Icon name="phone" size={18} /></span>
+        {org.phone}
+      </a>
+      <a class="mobile-menu__contact" href={`mailto:${org.email}`}>
+        <span class="mobile-menu__icon"><Icon name="envelope" size={18} /></span>
+        {org.email}
+      </a>
+      <div class="mobile-menu__socials">
+        {socials.filter((s) => s.url).map((s) => (
+          <a href={s.url!} target="_blank" rel="noopener" aria-label={s.name}><Icon name={s.icon} size={22} /></a>
+        ))}
+      </div>
+      <!-- Last, so it sits at the bottom of the screen within thumb reach -->
+      <a class="btn mobile-menu__cta" href="#support" data-menu-link>
+        <Icon name="heart" size={18} />
+        Підтримати фонд
+      </a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    transition: background-color 0.3s, box-shadow 0.3s, backdrop-filter 0.3s;
+  }
+  .header.is-scrolled,
+  .header.is-open {
+    /* Frosted glass, opaque enough that the menu stays readable over the navy sections */
+    background: rgb(248 247 244 / 0.86);
+    backdrop-filter: saturate(1.2) blur(20px);
+    box-shadow: 0 1px 0 var(--line);
+  }
+  /* Older Safari only knows the prefixed property. It lives in its own rule: next to the standard one
+     the CSS minifier merges the pair and keeps only the prefix, which Chrome ignores. */
+  @supports (-webkit-backdrop-filter: none) and (not (backdrop-filter: none)) {
+    .header.is-scrolled { -webkit-backdrop-filter: saturate(1.2) blur(20px); }
+  }
+  /* backdrop-filter would make the fixed mobile menu position against the header box */
+  .header.is-open {
+    background: var(--bg);
+    backdrop-filter: none;
+  }
+  .header__inner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: var(--header-h);
+  }
+  .header__logo { flex: none; margin-right: auto; }
+  .header__logo img { width: 116px; height: auto; }
+
+  .header__nav { display: none; }
+  .header__nav ul { display: flex; gap: 4px; margin: 0; padding: 0; list-style: none; }
+  .header__nav a {
+    display: block;
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.9688rem;
+    text-decoration: none;
+    color: var(--text);
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .header__nav a:hover { background: rgb(13 47 156 / 0.06); }
+  .header__nav a.is-active { color: var(--navy); background: rgb(82 113 255 / 0.14); }
+
+  .header__cta { display: none; }
+
+  .header__burger {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    cursor: var(--cursor-link);
+  }
+  .burger-lines { display: grid; gap: 6px; width: 20px; }
+  .burger-lines span {
+    height: 2px;
+    border-radius: 2px;
+    background: var(--navy);
+    transition: transform 0.3s var(--ease);
+  }
+  .is-open .burger-lines span:first-child { transform: translateY(4px) rotate(45deg); }
+  .is-open .burger-lines span:last-child { transform: translateY(-4px) rotate(-45deg); }
+
+  .mobile-menu {
+    position: fixed;
+    inset: var(--header-h) 0 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 32px;
+    padding: 24px var(--gutter) calc(24px + env(safe-area-inset-bottom));
+    background: var(--bg);
+    overflow-y: auto;
+  }
+  .mobile-menu[hidden] { display: none; }
+  .mobile-menu ul { margin: 0; padding: 0; list-style: none; }
+  .mobile-menu li {
+    border-bottom: 1px solid var(--line);
+    animation: menu-in 0.5s var(--ease) both;
+    animation-delay: calc(var(--i) * 50ms);
+  }
+  .mobile-menu li a {
+    display: block;
+    padding: 18px 0;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--navy);
+    text-decoration: none;
+  }
+  .mobile-menu__footer { display: grid; gap: 12px; }
+  .mobile-menu__contact {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--text);
+    overflow-wrap: anywhere;
+  }
+  .mobile-menu__icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--tint);
+    color: var(--blue-strong);
+  }
+  .mobile-menu__socials { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .mobile-menu__cta { margin-top: 12px; }
+  .mobile-menu__socials a {
+    display: grid; place-items: center; width: 48px; height: 48px;
+    border-radius: 50%; background: var(--surface); box-shadow: var(--shadow); color: var(--navy);
+  }
+
+  @keyframes menu-in {
+    from { opacity: 0; transform: translateY(12px); }
+  }
+
+  @media (min-width: 640px) {
+    .header__cta { display: inline-flex; }
+  }
+  @media (min-width: 1080px) {
+    .header__logo img { width: 134px; }
+    .header__nav { display: block; }
+    .header__burger, .mobile-menu { display: none !important; }
+  }
+</style>

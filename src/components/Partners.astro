@@ -1,0 +1,60 @@
+---
+import { Image } from 'astro:assets';
+import { partners } from '../data/site';
+---
+
+<section class="section partners" id="partners">
+  <div class="container">
+    <div class="section-head section-head--center" data-reveal>
+      <span class="eyebrow">Партнери</span>
+      <h2>Нам довіряють і з нами працюють</h2>
+    </div>
+
+    <ul class="partners__grid">
+      {partners.map((p, i) => (
+        <li data-reveal style={`--d:${i % 5}${p.scale ? `; --s:${p.scale}` : ''}`} title={p.name}>
+          <Image src={p.logo} alt={p.name} widths={[240, 480]} sizes="200px" />
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .partners { background: var(--surface); padding-top: 0; }
+  .partners__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* Bare logos on the white section, no tiles; every logo is fitted into the same box so none dominates */
+  .partners__grid li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 112px;
+    padding: 16px 18px;
+    transition: transform 0.35s var(--ease);
+  }
+  .partners__grid li:hover { transform: translateY(-2px) scale(1.04); }
+  /* max-* against the box's fixed height: tall emblems and wide wordmarks both stay inside;
+     --s shrinks the few logos that read heavier than the rest */
+  .partners__grid img {
+    width: auto;
+    height: auto;
+    max-width: calc(100% * var(--s, 1));
+    max-height: calc(100% * var(--s, 1));
+    object-fit: contain;
+  }
+
+  @media (min-width: 640px) {
+    .partners__grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  }
+  @media (min-width: 1024px) {
+    .partners__grid { grid-template-columns: repeat(5, 1fr); }
+    .partners__grid li { height: 128px; }
+  }
+</style>
